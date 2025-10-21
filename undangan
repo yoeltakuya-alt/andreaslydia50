@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undangan Digital</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    text-align: center;
+    background-size: cover;
+    background-position: center;
+  }
+  .overlay {
+    background: rgba(255, 255, 255, 0.8);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+    color: #666;
+  }
+  .details {
+    margin-top: 2rem;
+  }
+  #adminPanel {
+    display: none;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    max-width: 600px;
+    margin: 2rem auto;
+  }
+  textarea, input {
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+  }
+  button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #0056b3;
+  }
+  #linksContainer a {
+    display: block;
+    margin: 0.25rem 0;
+  }
+</style>
+</head>
+<body>
+  <div class="overlay">
+    <h1 id="eventTitle">Undangan Spesial</h1>
+    <h2 id="eventSubtitle">Kepada Yth. <span id="guestName">Tamu Undangan</span></h2>
+    <div class="details">
+      <p id="eventDate">Tanggal: 10 November 2025</p>
+      <p id="eventLocation">Lokasi: Grand Hall Semarang</p>
+    </div>
+  </div>
+
+  <div id="adminPanel">
+    <h2>Admin Panel</h2>
+    <label>Upload Background:</label>
+    <input type="file" id="bgUpload" accept="image/*"><br>
+    <label>Judul Acara:</label>
+    <input type="text" id="titleInput" placeholder="Judul Undangan">
+    <label>Subjudul:</label>
+    <input type="text" id="subtitleInput" placeholder="Subjudul">
+    <label>Tanggal:</label>
+    <input type="text" id="dateInput" placeholder="Tanggal">
+    <label>Lokasi:</label>
+    <input type="text" id="locationInput" placeholder="Lokasi">
+    <label>Daftar Nama (satu per baris):</label>
+    <textarea id="namesList" rows="6" placeholder="Contoh:\nAndi\nRina\nBudi"></textarea>
+    <button id="generateLinks">Generate Links</button>
+    <div id="linksContainer"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const guestName = params.get('to');
+    const isAdmin = params.get('admin');
+
+    if (guestName) {
+      document.getElementById('guestName').innerText = decodeURIComponent(guestName);
+    }
+
+    if (isAdmin) {
+      document.getElementById('adminPanel').style.display = 'block';
+    }
+
+    const bgUpload = document.getElementById('bgUpload');
+    bgUpload?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        localStorage.setItem('bgImage', ev.target.result);
+        document.body.style.backgroundImage = `url(${ev.target.result})`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    const savedBg = localStorage.getItem('bgImage');
+    if (savedBg) document.body.style.backgroundImage = `url(${savedBg})`;
+
+    document.getElementById('generateLinks')?.addEventListener('click', () => {
+      const baseURL = window.location.href.split('?')[0];
+      const names = document.getElementById('namesList').value.split('\n').filter(n => n.trim() !== '');
+      const container = document.getElementById('linksContainer');
+      container.innerHTML = '';
+      names.forEach(name => {
+        const link = `${baseURL}?to=${encodeURIComponent(name.trim())}`;
+        const a = document.createElement('a');
+        a.href = link;
+        a.textContent = `${name} → ${link}`;
+        container.appendChild(a);
+      });
+    });
+  </script>
+</body>
+</html>
